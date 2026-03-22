@@ -1,0 +1,52 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+import joblib
+
+diseases = ['diabetes', 'heart_disease', 'hypertension', 'obesity', 'insomnia']
+
+for disease in diseases:
+    print(f"\n{'='*50}")
+    print(f"Training {disease.upper()} model...")
+    print('='*50)
+    
+    # Load dataset
+    data = pd.read_csv(f'{disease}.csv')
+    
+    print(f"Dataset shape: {data.shape}")
+    print(f"Columns: {list(data.columns)}")
+    
+    # Clean non-numeric data
+    for col in data.columns:
+        data[col] = pd.to_numeric(data[col], errors='coerce')
+    data = data.dropna()
+    
+    print(f"Shape after cleaning: {data.shape}")
+    
+    # Features and target
+    X = data.iloc[:, :-1]
+    target_col = data.columns[-1]
+    y = data[target_col]
+    print(f"Target column: {target_col}")
+    
+    # Split
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    
+    # Model
+    model = RandomForestClassifier(n_estimators=100, random_state=42)
+    model.fit(X_train, y_train)
+    
+    # Accuracy
+    y_pred = model.predict(X_test)
+    accuracy = accuracy_score(y_test, y_pred)
+    print(f"Model Accuracy: {accuracy:.2f}")
+    
+    # Save
+    joblib.dump(model, f'{disease}_model.pkl')
+    print(f"Saved {disease}_model.pkl")
+
+print("\n🎉 ALL MODELS TRAINED SUCCESSFULLY!")
+print("Run: python app.py to test")
+
